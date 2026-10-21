@@ -1,0 +1,242 @@
+<div class="transactions-page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">FINANCIAL MANAGEMENT</p>
+      <h1>Transactions</h1>
+      <p class="subtitle">
+        Manage and monitor all your income and expenses.
+      </p>
+    </div>
+
+    <button
+      class="primary-button"
+      type="button"
+      (click)="showForm = !showForm"
+    >
+      <span>+</span> Add Transaction
+    </button>
+  </header>
+
+  @if (showForm) {
+    <form class="transaction-form" (submit)="addTransaction($event)">
+      <div class="form-field">
+        <label for="description">Description</label>
+        <input
+          id="description"
+          name="description"
+          type="text"
+          placeholder="e.g. Grocery shopping"
+          required
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="amount">Amount (₹)</label>
+        <input
+          id="amount"
+          name="amount"
+          type="number"
+          min="0.01"
+          step="0.01"
+          placeholder="0.00"
+          required
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="type">Transaction type</label>
+        <select id="type" name="type" required>
+          <option value="expense">Expense</option>
+          <option value="income">Income</option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="category">Category</label>
+        <select
+          id="category"
+          name="category"
+          [value]="selectedCategory"
+          (change)="selectedCategory = $any($event.target).value"
+          required
+        >
+          <option value="Food">Food</option>
+          <option value="Transport">Transport</option>
+          <option value="Shopping">Shopping</option>
+          <option value="Bills">Bills</option>
+          <option value="Salary">Salary</option>
+          <option value="Education">Education</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      @if (selectedCategory === 'Other') {
+        <div class="form-field">
+          <label for="customCategory">Enter your category</label>
+          <input
+            id="customCategory"
+            name="customCategory"
+            type="text"
+            placeholder="e.g. Medical, Rent, Subscriptions"
+            required
+          />
+        </div>
+      }
+
+      <div class="form-actions">
+        <button
+          class="secondary-button"
+          type="button"
+          (click)="showForm = false; selectedCategory = 'Food'"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-button" type="submit">
+          Save Transaction
+        </button>
+      </div>
+    </form>
+  }
+
+  <section class="stats-grid">
+    <article class="stat-card">
+      <div class="stat-icon purple">↗</div>
+      <p>Total Transactions</p>
+      <h2>{{ transactions.length }}</h2>
+      <span>Recorded entries</span>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-icon green">＋</div>
+      <p>Total Income</p>
+      <h2>{{ income | currency:'INR':'symbol':'1.0-2' }}</h2>
+      <span>Money received</span>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-icon red">−</div>
+      <p>Total Expenses</p>
+      <h2>{{ expenses | currency:'INR':'symbol':'1.0-2' }}</h2>
+      <span>Money spent</span>
+    </article>
+  </section>
+
+  <section class="transactions-card">
+    <div class="table-heading">
+      <div>
+        <h2>All Transactions</h2>
+        <p>Search and filter your financial activity.</p>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-box">
+        <span>⌕</span>
+        <input
+          type="search"
+          placeholder="Search transactions..."
+          aria-label="Search transactions"
+          [value]="searchTerm"
+          (input)="searchTerm = $any($event.target).value"
+        />
+      </div>
+
+      <select
+        class="filter-select"
+        aria-label="Filter by transaction type"
+        [value]="selectedType"
+        (change)="selectedType = $any($event.target).value"
+      >
+        <option value="all">All Types</option>
+        <option value="income">Income</option>
+        <option value="expense">Expense</option>
+      </select>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (transaction of filteredTransactions; track transaction.id) {
+            <tr>
+              <td>
+                <div class="transaction-description">
+                  <div
+                    class="transaction-avatar"
+                    [class.avatar-income]="transaction.type === 'income'"
+                    [class.avatar-expense]="transaction.type === 'expense'"
+                  >
+                    {{ transaction.description.charAt(0).toUpperCase() }}
+                  </div>
+
+                  <span>{{ transaction.description }}</span>
+                </div>
+              </td>
+
+              <td>
+                <span class="category-badge">
+                  {{ transaction.category }}
+                </span>
+              </td>
+
+              <td>
+                <span
+                  class="type-badge"
+                  [class.income-badge]="transaction.type === 'income'"
+                  [class.expense-badge]="transaction.type === 'expense'"
+                >
+                  {{ transaction.type === 'income' ? 'Income' : 'Expense' }}
+                </span>
+              </td>
+
+              <td>
+                <span
+                  class="amount"
+                  [class.income-amount]="transaction.type === 'income'"
+                  [class.expense-amount]="transaction.type === 'expense'"
+                >
+                  {{ transaction.type === 'income' ? '+' : '−' }}
+                  {{ transaction.amount | currency:'INR':'symbol':'1.2-2' }}
+                </span>
+              </td>
+
+              <td>
+                <button
+                  class="delete-button"
+                  type="button"
+                  (click)="deleteTransaction(transaction.id)"
+                  [attr.aria-label]="'Delete ' + transaction.description"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="empty-state">
+                <div class="empty-icon">₹</div>
+                <h3>No transactions found</h3>
+                <p>Try another search or add a new transaction.</p>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <footer class="table-footer">
+      Showing {{ filteredTransactions.length }} of
+      {{ transactions.length }} transactions
+    </footer>
+  </section>
+</div>

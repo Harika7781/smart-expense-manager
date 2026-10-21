@@ -1,0 +1,191 @@
+
+<div class="dashboard-page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">PERSONAL FINANCE</p>
+      <h1>Financial Overview</h1>
+      <p class="subtitle">Track your money. Make smarter decisions.</p>
+    </div>
+    <span class="month-label">{{ currentMonth }}</span>
+  </header>
+
+  <!-- Financial Summary -->
+  <section class="summary-grid">
+    <article class="summary-card">
+      <div class="card-icon purple">₹</div>
+      <p>Total Balance</p>
+      <h2>{{ balance | currency:'INR':'symbol':'1.0-0' }}</h2>
+      <span>Income minus expenses</span>
+    </article>
+
+    <article class="summary-card">
+      <div class="card-icon green">↗</div>
+      <p>Total Income</p>
+      <h2>{{ income | currency:'INR':'symbol':'1.0-0' }}</h2>
+      <span>Money received</span>
+    </article>
+
+    <article class="summary-card">
+      <div class="card-icon red">↘</div>
+      <p>Total Expenses</p>
+      <h2>{{ expenses | currency:'INR':'symbol':'1.0-0' }}</h2>
+      <span>Money spent</span>
+    </article>
+
+    <article class="summary-card">
+      <div class="card-icon yellow">▤</div>
+      <p>Transactions</p>
+      <h2>{{ transactions.length }}</h2>
+      <span>Recorded entries</span>
+    </article>
+  </section>
+
+  <!-- Charts -->
+  <section class="charts-grid">
+    <article class="panel">
+      <h2>Income vs Expenses</h2>
+      <p class="panel-subtitle">Comparison of your recorded totals</p>
+
+      <div class="bar-chart">
+        <div class="bar-group">
+          <div class="bars">
+            <div
+              class="bar income-bar"
+              [style.height.%]="incomeHeight"
+              [title]="'Income: ' + income"
+            ></div>
+            <div
+              class="bar expense-bar"
+              [style.height.%]="expenseHeight"
+              [title]="'Expenses: ' + expenses"
+            ></div>
+          </div>
+          <span>Current</span>
+        </div>
+      </div>
+
+      <div class="chart-legend">
+        <span><i class="legend-dot income-dot"></i>Income</span>
+        <span><i class="legend-dot expense-dot"></i>Expenses</span>
+      </div>
+    </article>
+
+    <article class="panel">
+      <h2>Expense Breakdown</h2>
+      <p class="panel-subtitle">Where your money goes</p>
+
+      <div class="donut-layout">
+        <div
+          class="donut-chart"
+          [style.background]="donutBackground"
+        >
+          <div class="donut-center">
+            <strong>{{ expenses | currency:'INR':'symbol':'1.0-0' }}</strong>
+            <span>Total spent</span>
+          </div>
+        </div>
+
+        <div class="category-list">
+          @for (item of expenseBreakdown; track item.category) {
+            <div>
+              <i
+                class="category-dot"
+                [style.background]="item.color"
+              ></i>
+              <span>{{ item.category }}</span>
+              <strong>
+                {{ item.amount | currency:'INR':'symbol':'1.0-0' }}
+              </strong>
+            </div>
+          } @empty {
+            <p>No expenses recorded yet.</p>
+          }
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <!-- Recent Transactions and Spending Summary -->
+  <section class="bottom-grid">
+    <article class="panel recent-panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Recent Transactions</h2>
+          <p class="panel-subtitle">Your latest financial activity</p>
+        </div>
+        <a routerLink="/transactions" class="view-link">
+          Go to Transactions →
+        </a>
+      </div>
+
+      @for (transaction of recentTransactions; track transaction.id) {
+        <div class="recent-row">
+          <span
+            class="transaction-icon"
+            [class.green]="transaction.type === 'income'"
+            [class.red]="transaction.type === 'expense'"
+          >
+            {{ transaction.type === 'income' ? '↗' : '−' }}
+          </span>
+
+          <div class="transaction-info">
+            <strong>{{ transaction.description }}</strong>
+            <span>{{ transaction.category }}</span>
+          </div>
+
+          <strong
+            [class.positive]="transaction.type === 'income'"
+            [class.negative]="transaction.type === 'expense'"
+          >
+            {{ transaction.type === 'income' ? '+' : '−' }}
+            {{ transaction.amount | currency:'INR':'symbol':'1.0-0' }}
+          </strong>
+        </div>
+      } @empty {
+        <p>No transactions recorded yet.</p>
+      }
+    </article>
+
+    <article class="panel insight-panel">
+      <h2>Spending Summary</h2>
+      <p class="panel-subtitle">Your current financial position</p>
+
+      <div class="insight-icon">✦</div>
+
+      <h3>
+        {{ balance >= 0
+          ? 'You’re in a positive balance'
+          : 'Expenses exceed income' }}
+      </h3>
+
+      <p>
+        {{ balance >= 0
+          ? 'Your recorded income is higher than your expenses.'
+          : 'Your recorded expenses are higher than your income.' }}
+      </p>
+
+      <div class="progress-heading">
+        <span>Income spent</span>
+        <strong>
+          {{ income > 0 ? (expenses / income * 100 | number:'1.0-1') : '0' }}%
+        </strong>
+      </div>
+
+      <div class="progress-track">
+        <div
+          class="progress-value"
+          [style.width.%]="income > 0
+            ? (expenses / income * 100 > 100
+              ? 100
+              : expenses / income * 100)
+            : 0"
+        ></div>
+      </div>
+
+      <p class="small-note">
+        Based on {{ expenses | currency:'INR':'symbol':'1.0-0' }} in expenses
+        and {{ income | currency:'INR':'symbol':'1.0-0' }} in income.
+      </p>
+    </article>
+  </section>
+</div>

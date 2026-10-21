@@ -1,0 +1,69 @@
+
+<div class="budgets-page">
+  <header class="page-header">
+    <p class="eyebrow">PERSONAL FINANCE</p>
+    <h1>Budget Planner</h1>
+    <p class="subtitle">Plan your spending and stay on track.</p>
+  </header>
+
+  <section class="budget-overview">
+    <div class="budget-card">
+      <span>Monthly Budget</span>
+      <h2>{{ monthlyBudget | currency:'INR':'symbol':'1.0-0' }}</h2>
+      <label for="budgetAmount">Update monthly limit</label>
+      <div class="budget-input">
+        <input #budgetAmount id="budgetAmount" type="number" min="1" [value]="monthlyBudget">
+        <button type="button" (click)="updateBudget(budgetAmount.value)">Update</button>
+      </div>
+    </div>
+
+    <div class="budget-card">
+      <span>Total Spent</span>
+      <h2>{{ totalSpent | currency:'INR':'symbol':'1.0-0' }}</h2>
+      <p>Recorded expenses</p>
+    </div>
+
+    <div class="budget-card">
+      <span>Remaining Budget</span>
+      <h2>{{ remainingBudget | currency:'INR':'symbol':'1.0-0' }}</h2>
+      <p>{{ budgetStatus }}</p>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Overall Budget Progress</h2>
+    <p>{{ spendingPercentage | number:'1.0-0' }}% used</p>
+    <div class="progress-track">
+      <div class="progress-fill"
+           [style.width.%]="spendingPercentage"
+           [class.over-budget]="totalSpent > monthlyBudget"></div>
+    </div>
+  </section>
+
+  <section class="panel category-panel">
+    <h2>Category Budgets</h2>
+
+    @for (item of categoryBudgets; track item.category) {
+      <div class="category-budget-row">
+        <div class="category-details">
+          <strong>{{ item.category }}</strong>
+          <span>{{ item.spent | currency:'INR':'symbol':'1.0-0' }} / {{ item.limit | currency:'INR':'symbol':'1.0-0' }}</span>
+        </div>
+
+        <div class="progress-track">
+          <div class="progress-fill"
+               [style.width.%]="item.percentage"
+               [class.over-budget]="item.spent > item.limit"></div>
+        </div>
+
+        <p>
+          @if (item.remaining >= 0) {
+            {{ item.remaining | currency:'INR':'symbol':'1.0-0' }} remaining
+          } @else {
+            {{ -item.remaining | currency:'INR':'symbol':'1.0-0' }} over budget
+          }
+        </p>
+      </div>
+    }
+  </section>
+</div>

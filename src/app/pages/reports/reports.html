@@ -1,0 +1,138 @@
+
+<div class="reports-page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">PERSONAL FINANCE</p>
+      <h1>Financial Reports</h1>
+      <p class="subtitle">Understand your income, expenses and savings.</p>
+    </div>
+    <div class="report-date">{{ currentDate }}</div>
+  </header>
+
+  <section class="report-summary">
+    <div class="report-card">
+      <span>Total Income</span>
+      <h2>{{ income | currency:'INR':'symbol':'1.0-0' }}</h2>
+      <p>All recorded income</p>
+    </div>
+
+    <div class="report-card">
+      <span>Total Expenses</span>
+      <h2>{{ expenses | currency:'INR':'symbol':'1.0-0' }}</h2>
+      <p>All recorded expenses</p>
+    </div>
+
+    <div class="report-card">
+      <span>Net Savings</span>
+      <h2 [class.negative]="balance < 0">
+        {{ balance | currency:'INR':'symbol':'1.0-0' }}
+      </h2>
+      <p>Income minus expenses</p>
+    </div>
+
+    <div class="report-card">
+      <span>Savings Rate</span>
+      <h2>{{ savingsRate | number:'1.0-1' }}%</h2>
+      <p>Share of income left over</p>
+    </div>
+  </section>
+
+  <section class="report-grid">
+    <div class="panel">
+      <h2>Expense Breakdown</h2>
+      <p class="panel-subtitle">Where your money is going</p>
+
+      @if (expenseBreakdown.length === 0) {
+        <p class="empty-state">No expenses recorded yet.</p>
+      } @else {
+        @for (item of expenseBreakdown; track item.category) {
+          <div class="breakdown-item">
+            <div class="breakdown-heading">
+              <strong>{{ item.category }}</strong>
+              <span>{{ item.amount | currency:'INR':'symbol':'1.0-0' }}</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" [style.width.%]="item.percentage"></div>
+            </div>
+            <p>{{ item.percentage | number:'1.0-1' }}% of total expenses</p>
+          </div>
+        }
+      }
+    </div>
+
+    <div class="panel">
+      <h2>Transaction Statistics</h2>
+      <p class="panel-subtitle">Your recorded financial activity</p>
+
+      <div class="stat-row">
+        <span>Total transactions</span>
+        <strong>{{ transactions.length }}</strong>
+      </div>
+      <div class="stat-row">
+        <span>Income transactions</span>
+        <strong>{{ incomeTransactions.length }}</strong>
+      </div>
+      <div class="stat-row">
+        <span>Expense transactions</span>
+        <strong>{{ expenseTransactions.length }}</strong>
+      </div>
+      <div class="stat-row">
+        <span>Average expense</span>
+        <strong>
+          {{
+            expenseTransactions.length
+              ? (expenses / expenseTransactions.length | currency:'INR':'symbol':'1.0-0')
+              : (0 | currency:'INR':'symbol':'1.0-0')
+          }}
+        </strong>
+      </div>
+
+      @if (largestExpense; as largest) {
+        <div class="largest-expense">
+          <span>Largest individual expense</span>
+          <h3>{{ largest.description }}</h3>
+          <strong>{{ largest.amount | currency:'INR':'symbol':'1.0-0' }}</strong>
+          <p>{{ largest.category }}</p>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="panel report-table-panel">
+    <h2>All Transactions</h2>
+    <p class="panel-subtitle">A complete overview of your recorded activity</p>
+
+    @if (transactions.length === 0) {
+      <p class="empty-state">No transactions available. Add one on the Transactions page.</p>
+    } @else {
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Category</th>
+              <th>Type</th>
+              <th class="amount-column">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of transactions; track item.id) {
+              <tr>
+                <td>{{ item.description }}</td>
+                <td>{{ item.category }}</td>
+                <td>
+                  <span class="type-pill" [class.income-pill]="item.type === 'income'">
+                    {{ item.type }}
+                  </span>
+                </td>
+                <td class="amount-column" [class.income-text]="item.type === 'income'">
+                  {{ item.type === 'expense' ? '-' : '+' }}{{ item.amount | currency:'INR':'symbol':'1.0-0' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</div>
